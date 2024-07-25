@@ -55,60 +55,84 @@ public class ECExplodingProjectile : MonoBehaviour
 
     }
 
-    void FixedUpdate()
-    {
-        if (Missile)
-        {
-            projectileSpeed += projectileSpeed * projectileSpeedMultiplier;
-            //   transform.position = Vector3.MoveTowards(transform.position, missileTarget.transform.position, 0);
+    //void FixedUpdate()
+    //{
+    //    if (Missile)
+    //    {
+    //        projectileSpeed += projectileSpeed * projectileSpeedMultiplier;
+    //        //   transform.position = Vector3.MoveTowards(transform.position, missileTarget.transform.position, 0);
 
-            transform.LookAt(missileTarget);
+    //        transform.LookAt(missileTarget);
 
-            thisRigidbody.AddForce(transform.forward * projectileSpeed);
-        }
+    //        thisRigidbody.AddForce(transform.forward * projectileSpeed);
+    //    }
 
-        if (LookRotation && timer >= 0.05f)
-        {
-            transform.rotation = Quaternion.LookRotation(thisRigidbody.velocity);
-        }
+    //    if (LookRotation && timer >= 0.05f)
+    //    {
+    //        transform.rotation = Quaternion.LookRotation(thisRigidbody.velocity);
+    //    }
 
-        CheckCollision(previousPosition);
+    //    CheckCollision(previousPosition);
 
-        previousPosition = transform.position;
-    }
+    //    previousPosition = transform.position;
+    //}
 
-    void CheckCollision(Vector3 prevPos)
-    {
-        RaycastHit hit;
-        Vector3 direction = transform.position - prevPos;
-        Ray ray = new Ray(prevPos, direction);
-        float dist = Vector3.Distance(transform.position, prevPos);
-        if (Physics.Raycast(ray, out hit, dist))
-        {
-            transform.position = hit.point;
-            Quaternion rot = Quaternion.FromToRotation(Vector3.forward, hit.normal);
-            Vector3 pos = hit.point;
-            Instantiate(impactPrefab, pos, rot);
-            if (!explodeOnTimer && Missile == false)
-            {
-                Destroy(gameObject);
-            }
-            else if (Missile == true)
-            {
-                thisCollider.enabled = false;
-                particleKillGroup.SetActive(false);
-                thisRigidbody.velocity = Vector3.zero;
-                Destroy(gameObject, 5);
-            }
+    //void CheckCollision(Vector3 prevPos)
+    //{
+    //    RaycastHit hit;
+    //    Vector3 direction = transform.position - prevPos;
+    //    Ray ray = new Ray(prevPos, direction);
+    //    float dist = Vector3.Distance(transform.position, prevPos);
+    //    if (Physics.Raycast(ray, out hit, dist))
+    //    {
+    //        transform.position = hit.point;
+    //        Quaternion rot = Quaternion.FromToRotation(Vector3.forward, hit.normal);
+    //        Vector3 pos = hit.point;
+    //        Instantiate(impactPrefab, pos, rot);
+    //        if (!explodeOnTimer && Missile == false)
+    //        {
+    //            Destroy(gameObject);
+    //        }
+    //        else if (Missile == true)
+    //        {
+    //            thisCollider.enabled = false;
+    //            particleKillGroup.SetActive(false);
+    //            thisRigidbody.velocity = Vector3.zero;
+    //            Destroy(gameObject, 5);
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
     void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            //Debug.Log("Hit enemy");
+            BlazeAI enemy = collision.gameObject.GetComponent<BlazeAI>();
+            if (enemy == null)
+            {
+                return;
+            }
+            enemy.Hit();
+
+            BlazeAIDemo.Health blazeHealth = enemy.GetComponent<BlazeAIDemo.Health>();
+
+            if (blazeHealth.currentHealth > 0)
+            {
+                blazeHealth.currentHealth -= 10;
+            }
+
+            if (blazeHealth.currentHealth <= 0)
+            {
+                enemy.Death();
+            }
+        }
+
+        //Debug.Log("Hit " + collision.gameObject.name);
         if (collision.gameObject.tag != "FX")
         {
-            Debug.Log("Hit " + collision.gameObject.name);
+            //Debug.Log("Hit " + collision.gameObject.name);
             ContactPoint contact = collision.contacts[0];
             Quaternion rot = Quaternion.FromToRotation(Vector3.forward, contact.normal);
             if (ignorePrevRotation)
@@ -131,7 +155,7 @@ public class ECExplodingProjectile : MonoBehaviour
                 Destroy(gameObject, 5);
 
             }
-        }
+        }    
     }
 
     void Explode()
