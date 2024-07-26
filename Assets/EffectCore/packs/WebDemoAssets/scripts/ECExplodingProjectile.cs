@@ -27,6 +27,7 @@ public class ECExplodingProjectile : MonoBehaviour
     float timer;
 
     private Vector3 previousPosition;
+    private float damage = 10;
 
     // Use this for initialization
     void Start()
@@ -118,15 +119,17 @@ public class ECExplodingProjectile : MonoBehaviour
 
             BlazeAIDemo.Health blazeHealth = enemy.GetComponent<BlazeAIDemo.Health>();
 
-            if (blazeHealth.currentHealth > 0)
-            {
-                blazeHealth.currentHealth -= 10;
-            }
+            blazeHealth.TakeDamage(damage);
 
-            if (blazeHealth.currentHealth <= 0)
-            {
-                enemy.Death();
-            }
+            //if (blazeHealth.currentHealth > 0)
+            //{
+            //    blazeHealth.currentHealth -= 10;
+            //}
+
+            //if (blazeHealth.currentHealth <= 0)
+            //{
+            //    enemy.Death();
+            //}
         }
 
         //Debug.Log("Hit " + collision.gameObject.name);
